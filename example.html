@@ -1,0 +1,384 @@
+<!--
+Origin Author Blog: www.cnblogs.com/netWild
+
+Edit By TW Artick Chen via JQuery/Javascript
+https://gist.github.com/imseartk
+轉載請註明來源
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>圖形解鎖!!</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=7" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta name="author" content="gist.github.com/imseartk/Graphic_Lock" />
+	<link href="build.css" rel="stylesheet" type="text/css" />
+	<script src="js/jquery-1.8.2.js"></script>
+	<script src="js/jquery-ui-1.9.1.custom.min.js"></script>
+</head>
+<body>
+<div id="bgMap">
+	<!-- 預覽線條區塊 -->
+	<div id="ViewLine"></div>
+	<!-- 正式線條區塊 -->
+	<div id="Line"></div>
+	<!-- 節點區塊 -->
+	<div id="Spot"></div>
+</div>
+<div id="btnBar">
+	<a href="javascript:void(0);" onclick="final_check();">確認送出</a>
+	<a href="javascript:void(0);" onclick="renew();">重新來過</a>
+	<!--<a href="javascript:void(0);" onclick="">取消</a>-->
+</div>
+<hr />
+<h1 id="show"></h1>
+</body>
+</html>
+<script>
+$(function() 
+{
+	initial();
+});
+
+//初始資訊
+function initial()
+{
+	get_bg_target(180,310,"1","bgPitcher");
+	get_bg_target(113,410,"2","bgCatcher");
+	get_bg_target(255,310,"3","bgFirst");
+	get_bg_target(215,250,"4","bgSecond");
+	get_bg_target(10,260,"5","bgThird");
+	get_bg_target(55,225,"6","bgShort");
+	get_bg_target(-30,180,"7","bgLeft");
+	get_bg_target(100,170,"8","bgCenter");
+	get_bg_target(220,230,"9","bgRight");
+}
+//這就是密碼啦
+var position = [];
+var lastid = "";
+
+//按下確定
+function final_check()
+{
+	if(position.length < 3)
+	{
+		alert("圖形鎖請至少傳兩次球!");
+	}
+	else
+	{
+		alert("圖形密碼為: " + position.join(""));
+		renew();
+	}
+}
+
+
+//按下重來
+function renew()
+{
+	//清空選擇值
+	position.length = 0;
+	//清空最後節點值
+	lastid="";
+	//正式畫線清光
+	$("#Line").html("");
+	//預覽畫線清光
+	$("#ViewLine").html("");
+	//按下去的按鈕清光
+	$(".bgpress").attr("class","bgpointer");
+	//還沒按的也清光
+	$(".bgview").attr("class","bgpointer");
+}
+
+//按下取消
+function end()
+{
+	//window.close();
+}
+
+
+//取得背景位置
+function get_bg_target(x,y,val,id)
+{
+	//創建新<div>
+	var bgTmp = document.createElement("DIV"); //创建新DIV
+	bgTmp.value = val; //节点密码值
+	bgTmp.x = x;
+	bgTmp.y = y;
+	bgTmp.id = id;
+	//從CSS裡面找
+	bgTmp.className = "bgpointer";
+	bgTmp.style.width = "20px";
+	bgTmp.style.height = "20px";
+	bgTmp.style.left = x + "px";
+	bgTmp.style.top = y + "px";
+	//按下去的事件
+	bgTmp.onclick = function(){ click_check(id); }
+	//滑鼠移上來的事件
+	bgTmp.onmouseover = function(){ movein_check(id); }
+	//滑鼠移開的事件
+	bgTmp.onmouseout = function(){ moveout_check(id); }
+	//加入DOM
+	$("#Spot").append(bgTmp);
+}
+
+//按下去的事件
+function click_check(id)
+{
+	//如果已經按過就射後不理吧
+	if($("#"+id).attr("class") == "bgpress")
+	{
+		return false; 
+	}
+	//沒按過的話，就把class改成按過的
+	else
+	{
+		$("#"+id).attr("class","bgpress"); 
+		drow(id, 1);
+		refresh_code(id,$("#"+id).val());
+		return false; 
+	}
+}
+
+//滑鼠移上來的事件
+function movein_check(id)
+{
+	//如果已經按過，就放狗流
+	if($("#"+id).attr("class") == "bgpress")
+	{
+		return false; 
+	}
+	//沒按過的話，就把class改成預覽中
+	else
+	{
+		$("#"+id).attr("class","bgview"); 
+		drow(id, 2);
+		return false;
+	}
+}
+
+//滑鼠移開的事件
+function moveout_check(id)
+{
+	//如果已經按過，就放狗流
+	if($("#"+id).attr("class") == "bgpress")
+	{
+		return false; 
+	}
+	//不然就恢復原本設定
+	else
+	{
+		$("#"+id).attr("class","bgpointer"); 
+		$("#ViewLine").html("");
+		return false;
+	}
+}
+
+//更新
+function refresh_code(id,val)
+{
+	//加入密碼
+	position.push($("#"+id).val());
+	lastid = id;
+}
+
+//畫線
+//finalid: 按下那個節點的ID(不然我怎麼知道你要連到哪)
+//type: 1:真實畫線 2:預覽畫線
+function drow(finalid, type)
+{
+	//第一個節點就不畫了
+	if(lastid == "") 
+	{
+		return false;
+	}
+	else
+	{
+		var start = $("#"+lastid);
+		var end = $("#"+finalid); 
+		
+		if(start.offset().left == end.offset().left) 
+		{ 
+			//如果是垂直线
+			vertical(start.offset().left, start.offset().top, end.offset().top, type);
+			//return false;
+		} 
+		
+		else if(start.offset().top == end.offset().top) 
+		{ 
+			//如果是水平线
+			horizontal(start.offset().top, start.offset().left, end.offset().left, type);
+			//return false;
+		} 
+		else 
+		{ 
+			//如果是斜线
+			fly(start.offset().left, start.offset().top, end.offset().left, end.offset().top, type);
+			//return false;
+		}
+		return false;
+
+	}
+}
+
+//斜線
+function fly(start_x, start_y, end_x, end_y, type)
+{
+	var tmp = 0;
+	var diff = 0;
+	var color = "";
+	
+	//決定線條顏色
+	if(type==1)
+	{
+		color = "#5755FF";
+	}
+	else if(type == 2)
+	{
+		color = "#AFD6FF";
+	}
+	
+	//畫線時的座標修正
+	start_x = start_x+10;
+	start_y = start_y+10;
+	end_x = end_x+10;
+	end_y = end_y+10;
+	
+	//如果開始節點的X比最後節點的X還大，就兩者換位置
+	if(start_x > end_x)
+	{ 
+		tmp = start_x;
+		start_x = end_x;
+		end_x = tmp;
+		
+		tmp = start_y;
+		start_y = end_y;
+		end_y = tmp;
+	}
+	
+	//計算斜率
+	//var slope = (end_y - start_y) / (end_y - start_y);
+
+	for(var i=start_x;i<end_x;i=i+0.5)
+	{
+		diff = diff + 0.5;
+		
+		var line = document.createElement("DIV");
+		line.style.position = "absolute";
+		line.style.width = "2px";
+		line.style.height = "2px";
+		line.style.fontSize = "0pt";
+		line.style.overflow = "hidden";
+		line.style.background = color;
+		line.style.left = (i-1) + "px";
+		line.style.top = (start_y+(diff * (end_y - start_y) / (end_x - start_x))) + "px";
+		if(type == 1)
+		{
+			$("#Line").append(line);
+		}
+		else if(type == 2)
+		{
+			$("#ViewLine").append(line);
+		}
+	}
+}
+
+//直線
+function vertical(x, start_y, end_y, type)
+{
+	var tmp = 0;
+	
+	//決定線條顏色
+	if(type==1)
+	{
+		color = "#5755FF";
+	}
+	else if(type == 2)
+	{
+		color = "#AFD6FF";
+	}	
+	
+	//畫線時的座標修正
+	x = x+10; 
+	start_y =start_y+10;
+	end_y = end_y+10;
+	
+	//比大小，較小的放在start
+	if(start_y > end_y)
+	{
+		tmp = start_y;
+		start_y = end_y;
+		end_y = tmp;
+	}
+	
+	for(var i=start_y;i<end_y;i=i+0.5)
+	{
+		var line = document.createElement("DIV");
+		line.style.position = "absolute";
+		line.style.width = "2px";
+		line.style.height = "2px";
+		line.style.fontSize = "0pt";
+		line.style.overflow = "hidden";
+		line.style.background = color;
+		line.style.left = (x-1) + "px";
+		line.style.top = i + "px";
+		if(type == 1)
+		{
+			$("#Line").append(line);
+		}
+		else if(type == 2)
+		{
+			$("#ViewLine").append(line);
+		}
+	}
+}
+//橫線
+function horizontal(y, start_x, end_x, type)
+{
+	var tmp = 0;
+	
+	//決定線條顏色
+	if(type==1)
+	{
+		color = "#5755FF";
+	}
+	else if(type == 2)
+	{
+		color = "#AFD6FF";
+	}	
+	
+	//畫線時的座標修正
+	y = y+10; 
+	start_x =start_x+10;
+	end_x = end_x+10;
+	
+	//比大小，較小的放在start
+	if(start_x > end_x)
+	{
+		tmp = start_x;
+		start_x = end_x;
+		end_x = tmp;
+	}
+	
+	for(var i=start_x;i<end_x;i=i+0.5)
+	{
+		var line = document.createElement("DIV");
+		line.style.position = "absolute";
+		line.style.width = "2px";
+		line.style.height = "2px";
+		line.style.fontSize = "0pt";
+		line.style.overflow = "hidden";
+		line.style.background = color;
+		line.style.top = (y-1) + "px";
+		line.style.left = i + "px";
+		if(type == 1)
+		{
+			$("#Line").append(line);
+		}
+		else if(type == 2)
+		{
+			$("#ViewLine").append(line);
+		}
+	}
+
+}
+</script>
