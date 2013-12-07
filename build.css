@@ -3,10 +3,7 @@
 body { margin:0px; padding:0px; }
 div, h3, h4, h5, li, span, p, td, input { font-size:10pt; font-family: 微軟正黑體; }
 
-#bgMap { width:520px; height:455px; background:url(images/court.jpg); overflow:hidden; }
-.btnPoint { cursor:pointer; float:left; position: absolute; }
-.btnPointPrew { cursor:pointer; float:left; position: absolute; background:url(images/bgPonitPrew.png) center center no-repeat; }
-.btnPointOn { cursor:default; float:left; position: absolute; background:url(images/bgPonit.png) center center no-repeat; }
+#bgMap { width:520px; height:455px; background:url(court.jpg); overflow:hidden; }
 .bgpointer { cursor:pointer; float:left; position:relative; width:20px; height:20px; top:310px; left:180px;  background: #DEEEEE;
 -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px;}
 .bgpress { cursor:pointer; float:left; position:relative; width:20px; height:20px; top:310px; left:180px;  background: #5755FF;
@@ -19,6 +16,6 @@ div, h3, h4, h5, li, span, p, td, input { font-size:10pt; font-family: 微軟正
 
 
 
-#btnBar { width:520px; height:40px; background:url(images/bgBar.jpg); text-align:center;  }
+#btnBar { width:520px; height:40px; background:url(bgBar.jpg); text-align:center;  }
 #btnBar a:link, #btnBar a:visited { width:90px; height:25px; line-height:40px; color:#FFF; margin-right:10px; font-size:11pt; text-decoration:none; border:1px solid #0072A8; padding:2px 10px; }
 #btnBar a:hover { color:#FFF; text-decoration:none; border:1px solid #FFF }
